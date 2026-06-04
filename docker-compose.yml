@@ -1,15 +1,78 @@
+﻿# =============================================================================
+# LedgerLite — Docker Compose Stack
+# =============================================================================
+#
+# Runs the full local development environment in four containers.
+#
+# Startup order (enforced by depends_on conditions):
+#   1. dynamodb-local   — DynamoDB Local starts immediately
+#   2. dynamodb-init    — waits for dynamodb-local, then creates both tables
+#   3. account-service  — waits for dynamodb-init to complete successfully
+#   4. transaction-service — waits for account-service to pass its health check
+#
+# Ports exposed on localhost:
+#   8001 — Transaction Service  (maps container :8000 → host :8001)
+#   8002 — Account Service      (maps container :8000 → host :8002)
+#   8000 — DynamoDB Local       (maps container :8000 → host :8000)
+#
+# Quick start:
+#   docker compose up --build
+#   make smoke-test
+# =============================================================================
+
 services:
 
+  # ---------------------------------------------------------------------------
+  # DynamoDB Local
+  # ---------------------------------------------------------------------------
+  # Amazon's official local emulator for DynamoDB. Runs entirely in-memory
+  # ('-inMemory' flag) so all data is lost when the container stops. This keeps
+  # the local environment stateless — a fresh 'docker compose up' always starts
+  # with an empty database.
+  #
+  # '-sharedDb' tells DynamoDB Local to use a single shared database file for
+  # all regions and credentials, rather than separate files per credential set.
+  # This simplifies local usage since the init container and both services all
+  # use 'dummy' credentials and 'eu-west-1', and they all see the same tables.
+  #
+  # Port 8000 is DynamoDB Local's default. It is exposed on the host so you
+  # can inspect tables directly with the AWS CLI:
+  #   aws dynamodb list-tables --endpoint-url http://localhost:8000
+  #
+  # There is no HEALTHCHECK here — the amazon/dynamodb-local image is a minimal
+  # Java image with no curl or wget, making a shell-based health check awkward.
+  # The dynamodb-init container handles the timing concern with a sleep instead.
   dynamodb-local:
     image: amazon/dynamodb-local:latest
     container_name: dynamodb-local
     ports:
       - "8000:8000"
     command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
-    # No healthcheck here — the amazon/dynamodb-local image is a minimal Java
-    # image with no curl or wget. The dynamodb-init container handles timing
-    # with a sleep instead.
 
+  # ---------------------------------------------------------------------------
+  # DynamoDB Table Initialisation (one-shot)
+  # ---------------------------------------------------------------------------
+  # A short-lived container that creates both DynamoDB tables on startup.
+  # It exits with code 0 after the tables are created; Docker Compose marks it
+  # as 'service_completed_successfully', which downstream services wait for.
+  #
+  # Why a separate container?
+  #   The 'aws dynamodb create-table' commands need the AWS CLI, which is not
+  #   installed in the service images. Using a dedicated init container keeps
+  #   the service images lean and separates infrastructure setup from app code.
+  #
+  # The 'sleep 3' gives DynamoDB Local time to accept connections before the
+  # AWS CLI tries to reach it. This is a pragmatic workaround — DynamoDB Local
+  # starts fast but there is a brief window before it is ready.
+  #
+  # Credentials:
+  #   DynamoDB Local ignores credentials entirely. The AWS CLI still requires
+  #   them to be present, so 'dummy' values are provided via environment
+  #   variables. These are not real AWS credentials and are never sent to AWS.
+  #
+  # '--billing-mode PAY_PER_REQUEST' means no provisioned throughput needs to
+  # be specified. This is the simplest option for local dev — in production the
+  # Terraform configuration controls billing mode.
   dynamodb-init:
     image: amazon/aws-cli:latest
     container_name: dynamodb-init
@@ -17,8 +80,8 @@ services:
       - dynamodb-local
     environment:
       AWS_DEFAULT_REGION: eu-west-1
-      AWS_ACCESS_KEY_ID: dummy
-      AWS_SECRET_ACCESS_KEY: dummy
+      AWS_ACCESS_KEY_ID: dummy       # Required by the CLI; ignored by DynamoDB Local
+      AWS_SECRET_ACCESS_KEY: dummy   # Required by the CLI; ignored by DynamoDB Local
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -49,6 +112,46 @@ services:
 
         echo "Tables created successfully."
 
+  # ---------------------------------------------------------------------------
+  # Account Service
+  # ---------------------------------------------------------------------------
+  # Owns all account and balance data. Exposes a public API for account CRUD
+  # and an internal balance-update endpoint that is only called by the
+  # Transaction Service.
+  #
+  # Build context is './account-service' — Docker builds the image from the
+  # Dockerfile in that directory. The image is rebuilt automatically when
+  # 'docker compose up --build' is run, or manually with 'make build'.
+  #
+  # Port mapping: host:8002 → container:8000
+  #   The container always listens on 8000 (set by the Dockerfile CMD).
+  #   Mapping to 8002 on the host avoids a collision with DynamoDB Local (8000)
+  #   and leaves 8001 for the Transaction Service.
+  #
+  # Environment variables:
+  #   DYNAMODB_TABLE           — the table this service reads and writes
+  #   DYNAMODB_ENDPOINT_URL    — points at the DynamoDB Local container by name
+  #                              ('dynamodb-local' resolves within the Compose
+  #                              network). Absent in AWS; boto3 uses the real
+  #                              DynamoDB endpoint via the default credential chain.
+  #   AWS_ACCESS_KEY_ID /
+  #   AWS_SECRET_ACCESS_KEY    — 'dummy' values required by boto3 when
+  #                              DYNAMODB_ENDPOINT_URL is set. DynamoDB Local
+  #                              ignores them. In AWS, these are not set and
+  #                              boto3 picks up the ECS task role instead.
+  #   LOG_LEVEL                — controls Python logging verbosity
+  #   APP_VERSION              — set to 'local' here; set to the Git SHA by CI
+  #   SERVICE_NAME             — included in every structured JSON log line
+  #
+  # depends_on condition:
+  #   'service_completed_successfully' means this container will not start until
+  #   dynamodb-init has exited with code 0. This guarantees the DynamoDB tables
+  #   exist before the service tries to use them.
+  #
+  # healthcheck:
+  #   Polls GET /health every 15 seconds. The Transaction Service depends on
+  #   this service being healthy before it starts — the health check is what
+  #   enforces that ordering.
   account-service:
     build:
       context: ./account-service
@@ -60,8 +163,8 @@ services:
       DYNAMODB_TABLE: ledgerlite-accounts
       DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
       AWS_REGION: eu-west-1
-      AWS_ACCESS_KEY_ID: dummy
-      AWS_SECRET_ACCESS_KEY: dummy
+      AWS_ACCESS_KEY_ID: dummy       # Local dev only — boto3 requires this when an endpoint_url is set
+      AWS_SECRET_ACCESS_KEY: dummy   # Local dev only — boto3 requires this when an endpoint_url is set
       LOG_LEVEL: INFO
       APP_VERSION: local
       SERVICE_NAME: account-service
@@ -70,11 +173,34 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
+      interval: 15s      # Check every 15 seconds
+      timeout: 5s        # Fail the check if no response within 5 seconds
+      retries: 5         # Mark unhealthy after 5 consecutive failures
+      start_period: 15s  # Grace period before checks count — allows time for the app to start
 
+  # ---------------------------------------------------------------------------
+  # Transaction Service
+  # ---------------------------------------------------------------------------
+  # Creates and retrieves financial transactions. Calls the Account Service
+  # internally to update the account balance whenever a transaction is posted.
+  #
+  # Port mapping: host:8001 → container:8000
+  #
+  # ACCOUNT_SERVICE_URL:
+  #   Points at the account-service container by its Compose service name.
+  #   Docker Compose creates a shared network for all services in this file,
+  #   and service names resolve as hostnames within that network.
+  #   In AWS this would point at the internal ALB DNS name instead.
+  #
+  # depends_on condition:
+  #   'service_healthy' means this container will not start until account-
+  #   service has passed its health check. This ensures the Account Service
+  #   is ready to accept balance-update calls before any transactions can
+  #   be created.
+  #
+  # Note: no healthcheck is defined here. One can be added following the same
+  # pattern as account-service above if needed (e.g. for a future service that
+  # depends on transaction-service being healthy).
   transaction-service:
     build:
       context: ./transaction-service
@@ -83,12 +209,12 @@ services:
     ports:
       - "8001:8000"
     environment:
-      ACCOUNT_SERVICE_URL: http://account-service:8000
+      ACCOUNT_SERVICE_URL: http://account-service:8000  # Resolves within the Compose network
       DYNAMODB_TABLE: ledgerlite-transactions
       DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
       AWS_REGION: eu-west-1
-      AWS_ACCESS_KEY_ID: dummy
-      AWS_SECRET_ACCESS_KEY: dummy
+      AWS_ACCESS_KEY_ID: dummy       # Local dev only — boto3 requires this when an endpoint_url is set
+      AWS_SECRET_ACCESS_KEY: dummy   # Local dev only — boto3 requires this when an endpoint_url is set
       LOG_LEVEL: INFO
       APP_VERSION: local
       SERVICE_NAME: transaction-service
