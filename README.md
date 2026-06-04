@@ -1,2 +1,2 @@
 # microledger
-IaC containerised Python transaction service on AWS Fargate
+IaC containerised basic Python ledger service on AWS Fargate!

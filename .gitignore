@@ -1,0 +1,142 @@
+# ==========================================================
+# Python
+# ==========================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ==========================================================
+# Terraform
+# ==========================================================
+
+# Terraform working directory
+.terraform/
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform plans
+*.tfplan
+*.plan
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform CLI config
+.terraformrc
+terraform.rc
+
+# Sensitive variable files
+*.tfvars
+*.tfvars.json
+
+# ==========================================================
+# AWS
+# ==========================================================
+
+# AWS Credentials
+.aws/
+
+# AWS SAM
+.aws-sam/
+
+# Serverless Framework
+.serverless/
+
+# CloudFormation generated artifacts
+packaged.yaml
+output.yaml
+
+# Lambda deployment packages
+*.zip
+
+# ==========================================================
+# Datadog
+# ==========================================================
+
+# Local Datadog configuration
+datadog.yaml
+
+# API/App Keys
+datadog-api-key.txt
+datadog-app-key.txt
+
+# Terraform variable files containing Datadog secrets
+*datadog*.tfvars
+*datadog*.auto.tfvars
+
+# ==========================================================
+# OS Files
+# ==========================================================
+
+.DS_Store
+Thumbs.db
+
+# ==========================================================
+# Secrets & Certificates
+# ==========================================================
+
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Secrets
+secrets.yaml
+secrets.yml
+secret.json
+credentials.json
+
+# ==========================================================
+# Misc
+# ==========================================================
+
+tmp/
+temp/
+.cache/
