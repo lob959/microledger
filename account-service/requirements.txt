@@ -1,0 +1,11 @@
+# Web framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+
+# AWS SDK
+boto3>=1.34.0
+
+# Data validation
+pydantic>=2.7.0
+
+# Note: httpx is intentionally absent — this service does not call other services
