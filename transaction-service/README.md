@@ -1,4 +1,4 @@
-﻿# Transaction Service
+# Transaction Service
 
 The Transaction Service is responsible for creating and retrieving financial transactions. It is one of two microservices that make up LedgerLite — the other is the [Account Service](../account-service).
 

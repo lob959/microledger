@@ -1,4 +1,4 @@
-﻿# scripts/
+# scripts/
 
 Utility scripts for local development and testing. All scripts are written in bash and require the stack to be running via `docker compose up` before they are invoked.
 

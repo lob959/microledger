@@ -1,4 +1,4 @@
-﻿# transaction-service/app/
+# transaction-service/app/
 
 All application source code for the Transaction Service. Three modules with distinct responsibilities: application logic (`main.py`), data access (`database.py`), and observability (`logger.py`).
 

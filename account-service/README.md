@@ -1,4 +1,4 @@
-﻿# Account Service
+# Account Service
 
 The Account Service owns all account and balance data. It is one of two microservices that make up LedgerLite — the other is the [Transaction Service](../transaction-service).
 

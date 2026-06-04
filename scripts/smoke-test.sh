@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # scripts/smoke-test.sh
 #
 # End-to-end integration test for the LedgerLite local stack.

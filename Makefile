@@ -1,13 +1,13 @@
 # =============================================================================
-# LedgerLite Ã¢â‚¬â€ Developer Makefile
+# LedgerLite -- Developer Makefile
 # =============================================================================
 #
 # Provides short, memorable commands for the most common development tasks.
 # All targets are grouped into three sections:
 #
-#   1. Local development  Ã¢â‚¬â€ build, run, stop, log, and clean the Docker stack
-#   2. Smoke test         Ã¢â‚¬â€ end-to-end integration test against the local stack
-#   3. Terraform          Ã¢â‚¬â€ infrastructure plan, apply, and destroy
+#   1. Local development  -- build, run, stop, log, and clean the Docker stack
+#   2. Smoke test         -- end-to-end integration test against the local stack
+#   3. Terraform          -- infrastructure plan, apply, and destroy
 #
 # Usage:
 #   make <target>
@@ -20,7 +20,7 @@
 # (e.g. a file called 'clean' would prevent 'make clean' from running).
 .PHONY: build run stop restart logs clean smoke-test tf-plan tf-apply tf-destroy fmt help
 
-# Ã¢â€â‚¬Ã¢â€â‚¬ Local development Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+# -- Local development --------------------------------------------------------
 #
 # These targets wrap 'docker compose' (v2) commands. Docker Compose v2 is
 # bundled with Docker Desktop and replaces the older standalone docker-compose
@@ -32,7 +32,7 @@
 
 build:          ## Build both service images
 	# Reads the 'build' stanzas in docker-compose.yml and builds the images.
-	# Both services use multi-stage Dockerfiles Ã¢â‚¬â€ the builder stage installs
+	# Both services use multi-stage Dockerfiles -- the builder stage installs
 	# dependencies; the runtime stage copies only what is needed.
 	# Re-run after changing a Dockerfile or requirements.txt.
 	docker compose build
@@ -40,21 +40,21 @@ build:          ## Build both service images
 run:            ## Start all services (detached). Waits for health checks.
 	# '-d' starts containers in detached (background) mode.
 	# Startup order is enforced by depends_on conditions in docker-compose.yml:
-	#   dynamodb-local Ã¢â€ â€™ dynamodb-init Ã¢â€ â€™ account-service Ã¢â€ â€™ transaction-service
+	#   dynamodb-local -> dynamodb-init -> account-service -> transaction-service
 	# The sleep gives health checks time to settle before URLs are printed.
 	docker compose up -d
 	@echo ""
-	@echo "Services starting Ã¢â‚¬â€ waiting for health checks..."
+	@echo "Services starting -- waiting for health checks..."
 	@sleep 5
 	@echo ""
-	@echo "  Transaction Service Ã¢â€ â€™ http://localhost:8001/docs"
-	@echo "  Account Service     Ã¢â€ â€™ http://localhost:8002/docs"
-	@echo "  DynamoDB Local      Ã¢â€ â€™ http://localhost:8000/shell"
+	@echo "  Transaction Service -> http://localhost:8001/docs"
+	@echo "  Account Service     -> http://localhost:8002/docs"
+	@echo "  DynamoDB Local      -> http://localhost:8000/shell"
 	@echo ""
 	@echo "Run 'make logs' to follow output, 'make smoke-test' to verify."
 
 stop:           ## Stop all services
-	# Stops and removes containers but preserves named volumes Ã¢â‚¬â€ DynamoDB Local
+	# Stops and removes containers but preserves named volumes -- DynamoDB Local
 	# data survives a stop/start cycle. Use 'make clean' for a full wipe.
 	docker compose down
 
@@ -67,13 +67,13 @@ restart:        ## Rebuild and restart all services
 
 logs:           ## Follow logs for both services (Ctrl+C to exit)
 	# Streams real-time output from the two application containers.
-	# DynamoDB Local and the init container are excluded Ã¢â‚¬â€ they produce no
+	# DynamoDB Local and the init container are excluded -- they produce no
 	# useful output after initial startup.
 	# Tip: pipe through jq for readable JSON: docker compose logs -f ... | jq .
 	docker compose logs -f transaction-service account-service
 
 clean:          ## Stop services, remove volumes, clear Python cache
-	# '-v' removes named volumes Ã¢â‚¬â€ wipes all DynamoDB Local data. The next
+	# '-v' removes named volumes -- wipes all DynamoDB Local data. The next
 	# 'make run' recreates tables via the dynamodb-init container.
 	# '--remove-orphans' removes containers from previous Compose configs
 	# that are no longer defined in the current file.
@@ -82,7 +82,7 @@ clean:          ## Stop services, remove volumes, clear Python cache
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
 
-# Ã¢â€â‚¬Ã¢â€â‚¬ Smoke test Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+# -- Smoke test ---------------------------------------------------------------
 #
 # Exercises the full request path end-to-end against the running local stack.
 # Creates a fresh account each run so it is safe to run multiple times.
@@ -94,7 +94,7 @@ smoke-test:     ## End-to-end test: create account, post transactions, check bal
 	# '@' suppresses Make from echoing the command, keeping terminal output clean.
 	@bash scripts/smoke-test.sh
 
-# Ã¢â€â‚¬Ã¢â€â‚¬ Terraform Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+# -- Terraform ----------------------------------------------------------------
 #
 # Provisions and manages all AWS infrastructure in infrastructure/terraform/.
 # The '-chdir' flag makes Terraform use that directory as its working directory
@@ -122,7 +122,6 @@ tf-destroy:     ## DANGER: destroy all infrastructure
 	# Destroys every AWS resource managed by this configuration, including
 	# DynamoDB tables and all data stored in them. This is irreversible.
 	# The confirmation prompt is a safety gate against accidental teardown.
-	# 'confirm' escapes the shell variable so Make passes it to the shell.
 	@echo "WARNING: This will destroy all AWS resources including data."
 	@read -p "Type 'yes' to confirm: " confirm && [ "$$confirm" = "yes" ] \
 		|| (echo "Aborted." && exit 1)
@@ -133,10 +132,10 @@ fmt:            ## Format Terraform files
 	# Terraform changes to keep diffs free of style-only noise.
 	terraform -chdir=infrastructure/terraform fmt -recursive
 
-# Ã¢â€â‚¬Ã¢â€â‚¬ Help Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+# -- Help ---------------------------------------------------------------------
 #
 # Prints a table of all targets that have a '## ' inline comment.
-# grep matches 'target-name: ... ## description' lines.
+# grep matches lines of the form: target-name: ... ## description
 # awk splits on the separator and prints a two-column aligned table.
 # Targets without '## ' are intentionally excluded from the output.
 
