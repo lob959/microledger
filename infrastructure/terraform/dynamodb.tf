@@ -56,6 +56,7 @@ resource "aws_dynamodb_table" "accounts" {
 
   tags = {
     Name = "microledger-accounts"
+    Service = "account-service"
   }
 }
 
@@ -104,5 +105,6 @@ resource "aws_dynamodb_table" "transactions" {
 
   tags = {
     Name = "microledger-transactions"
+    Service = "transaction-service"
   }
 }

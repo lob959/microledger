@@ -35,6 +35,7 @@ resource "aws_sns_topic" "alerts" {
 
   tags = {
     Name = "${var.project}-${var.environment}-alerts"
+    Service = "shared"
   }
 }
 
@@ -70,6 +71,11 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_account_service" {
     ClusterName = aws_ecs_cluster.main.name
     ServiceName = aws_ecs_service.account_service.name
   }
+  tags = {
+
+    Name    = "${var.project}-${var.environment}-account-service-cpu-high"
+    Service = "account-service"
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "ecs_cpu_transaction_service" {
@@ -87,6 +93,11 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_transaction_service" {
   dimensions = {
     ClusterName = aws_ecs_cluster.main.name
     ServiceName = aws_ecs_service.transaction_service.name
+  }
+  tags = {
+
+    Name    = "${var.project}-${var.environment}-transaction-service-cpu-high"
+    Service = "transaction-service"
   }
 }
 
@@ -117,6 +128,11 @@ resource "aws_cloudwatch_metric_alarm" "ecs_memory_account_service" {
     ClusterName = aws_ecs_cluster.main.name
     ServiceName = aws_ecs_service.account_service.name
   }
+  tags = {
+
+    Name    = "${var.project}-${var.environment}-account-service-memory-high"
+    Service = "account-service"
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "ecs_memory_transaction_service" {
@@ -134,6 +150,11 @@ resource "aws_cloudwatch_metric_alarm" "ecs_memory_transaction_service" {
   dimensions = {
     ClusterName = aws_ecs_cluster.main.name
     ServiceName = aws_ecs_service.transaction_service.name
+  }
+  tags = {
+
+    Name    = "${var.project}-${var.environment}-transaction-service-memory-high"
+    Service = "transaction-service"
   }
 }
 
@@ -172,6 +193,11 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
   dimensions = {
     LoadBalancer = aws_lb.main.arn_suffix
   }
+  tags = {
+
+    Name    = "${var.project}-${var.environment}-alb-5xx"
+    Service = "shared"
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -204,4 +230,9 @@ resource "aws_cloudwatch_metric_alarm" "dynamodb_system_errors" {
   alarm_description   = "DynamoDB system errors detected. These are AWS-side failures — check AWS Service Health Dashboard."
   alarm_actions       = [aws_sns_topic.alerts.arn]
   treat_missing_data  = "notBreaching"
+  tags = {
+
+    Name    = "${var.project}-${var.environment}-dynamodb-system-errors"
+    Service = "shared"
+  }
 }

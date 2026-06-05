@@ -45,6 +45,7 @@ resource "aws_lb" "main" {
 
   tags = {
     Name = "${var.project}-${var.environment}-alb"
+    Service = "shared"
   }
 }
 
@@ -91,6 +92,7 @@ resource "aws_lb_target_group" "transaction_service" {
 
   tags = {
     Name = "${var.project}-${var.environment}-tx-tg"
+    Service = "transaction-service"
   }
 }
 
@@ -120,5 +122,9 @@ resource "aws_lb_listener" "http" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.transaction_service.arn
+  }
+  tags = {
+    Name    = "${var.project}-${var.environment}-http-listener"
+    Service = "shared"
   }
 }

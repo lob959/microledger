@@ -58,6 +58,7 @@ resource "aws_ecr_repository" "account_service" {
 
   tags = {
     Name = "${var.project}/account-service"
+    Service = "account-service"
   }
 }
 
@@ -76,6 +77,7 @@ resource "aws_ecr_repository" "transaction_service" {
 
   tags = {
     Name = "${var.project}/transaction-service"
+    Service = "transaction-service"
   }
 }
 

@@ -57,6 +57,10 @@ data "aws_iam_policy_document" "ecs_tasks_assume_role" {
 resource "aws_iam_role" "ecs_task_execution" {
   name               = "${var.project}-${var.environment}-task-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role.json
+  tags = {
+    Name    = "${var.project}-${var.environment}-task-execution-role"
+    Service = "shared"
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -118,6 +122,10 @@ resource "aws_iam_role_policy" "ecs_task_execution_ssm" {
 resource "aws_iam_role" "ecs_task" {
   name               = "${var.project}-${var.environment}-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume_role.json
+  tags = {
+    Name    = "${var.project}-${var.environment}-task-role"
+    Service = "shared"
+  }
 }
 
 # ---------------------------------------------------------------------------

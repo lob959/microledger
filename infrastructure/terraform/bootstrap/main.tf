@@ -59,6 +59,10 @@ resource "aws_s3_bucket" "terraform_state" {
   lifecycle {
     prevent_destroy = true
   }
+  tags = {
+    Name    = "microledger-tfstate"
+    Service = "bootstrap"
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -133,6 +137,10 @@ resource "aws_dynamodb_table" "terraform_locks" {
   attribute {
     name = "LockID"
     type = "S"
+  }
+  tags = {
+    Name    = "microledger-terraform-locks"
+    Service = "bootstrap"
   }
 }
 

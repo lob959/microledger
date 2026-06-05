@@ -29,22 +29,24 @@
 # namespace for resource names and a boundary for Container Insights metrics.
 # Both services (account and transaction) run in this single cluster.
 #
-# containerInsights = "enabled" — enables CloudWatch Container Insights, which
-# collects CPU, memory, network, and disk metrics per service and task. Metrics
-# appear under the "ECS/ContainerInsights" CloudWatch namespace and are used
-# by the alarms in alarms.tf. Without this setting, ECS service-level metrics
-# are not published and the alarms would have no data to evaluate.
+# containerInsights = "disabled" — Container Insights publishes ~18 custom
+# CloudWatch metrics per cluster/service combination, charged at $0.30 per
+# metric per month (~$7/month at this scale). Disabled here to reduce cost.
+# The CloudWatch alarms in alarms.tf that depend on ECS metrics (CPU, memory)
+# will move to INSUFFICIENT_DATA state without this data source.
+# To re-enable: change the value to "enabled" and run terraform apply.
 
 resource "aws_ecs_cluster" "main" {
   name = "${var.project}-${var.environment}"
 
   setting {
     name  = "containerInsights"
-    value = "enabled"
+    value = "disabled"
   }
 
   tags = {
     Name = "${var.project}-${var.environment}-cluster"
+    Service = "shared"
   }
 }
 
@@ -74,6 +76,7 @@ resource "aws_cloudwatch_log_group" "account_service" {
 
   tags = {
     Name = "/ecs/${var.project}/account-service"
+    Service = "account-service"
   }
 }
 
@@ -83,6 +86,7 @@ resource "aws_cloudwatch_log_group" "transaction_service" {
 
   tags = {
     Name = "/ecs/${var.project}/transaction-service"
+    Service = "transaction-service"
   }
 }
 
@@ -115,6 +119,7 @@ resource "aws_service_discovery_private_dns_namespace" "main" {
 
   tags = {
     Name = "${var.project}.local"
+    Service = "shared"
   }
 }
 
@@ -158,6 +163,10 @@ resource "aws_service_discovery_service" "account_service" {
 
   health_check_custom_config {
     failure_threshold = 1
+  }
+  tags = {
+    Name    = "${var.project}.local/account-service"
+    Service = "account-service"
   }
 }
 
@@ -232,6 +241,7 @@ resource "aws_ecs_task_definition" "account_service" {
 
   tags = {
     Name = "${var.project}-${var.environment}-account-service"
+    Service = "account-service"
   }
 }
 
@@ -295,6 +305,7 @@ resource "aws_ecs_task_definition" "transaction_service" {
 
   tags = {
     Name = "${var.project}-${var.environment}-transaction-service"
+    Service = "transaction-service"
   }
 }
 
@@ -351,6 +362,7 @@ resource "aws_ecs_service" "account_service" {
 
   tags = {
     Name = "${var.project}-${var.environment}-account-service"
+    Service = "account-service"
   }
 }
 
@@ -400,5 +412,6 @@ resource "aws_ecs_service" "transaction_service" {
 
   tags = {
     Name = "${var.project}-${var.environment}-transaction-service"
+    Service = "transaction-service"
   }
 }

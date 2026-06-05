@@ -45,6 +45,7 @@ resource "aws_ssm_parameter" "account_service_url" {
 
   tags = {
     Name = "${var.project}-${var.environment}-account-service-url"
+    Service = "shared"
   }
 }
 
@@ -63,6 +64,7 @@ resource "aws_ssm_parameter" "log_level" {
 
   tags = {
     Name = "${var.project}-${var.environment}-log-level"
+    Service = "shared"
   }
 }
 
@@ -90,5 +92,6 @@ resource "aws_ssm_parameter" "app_version" {
 
   tags = {
     Name = "${var.project}-${var.environment}-app-version"
+    Service = "shared"
   }
 }

@@ -57,6 +57,7 @@ resource "aws_vpc" "main" {
 
   tags = {
     Name = "${var.project}-${var.environment}-vpc"
+    Service = "shared"
   }
 }
 
@@ -91,6 +92,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = "${var.project}-${var.environment}-public-${local.azs[count.index]}"
+    Service = "shared"
   }
 }
 
@@ -118,6 +120,7 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = "${var.project}-${var.environment}-private-${local.azs[count.index]}"
+    Service = "shared"
   }
 }
 
@@ -138,6 +141,7 @@ resource "aws_internet_gateway" "main" {
 
   tags = {
     Name = "${var.project}-${var.environment}-igw"
+    Service = "shared"
   }
 }
 
@@ -157,6 +161,7 @@ resource "aws_eip" "nat" {
 
   tags = {
     Name = "${var.project}-${var.environment}-nat-eip"
+    Service = "shared"
   }
 }
 
@@ -184,6 +189,7 @@ resource "aws_nat_gateway" "main" {
 
   tags = {
     Name = "${var.project}-${var.environment}-nat"
+    Service = "shared"
   }
 
   depends_on = [aws_internet_gateway.main]
@@ -208,6 +214,7 @@ resource "aws_route_table" "public" {
 
   tags = {
     Name = "${var.project}-${var.environment}-public-rt"
+    Service = "shared"
   }
 }
 
@@ -230,6 +237,7 @@ resource "aws_route_table" "private" {
 
   tags = {
     Name = "${var.project}-${var.environment}-private-rt"
+    Service = "shared"
   }
 }
 
@@ -294,6 +302,7 @@ resource "aws_security_group" "alb" {
 
   tags = {
     Name = "${var.project}-${var.environment}-alb-sg"
+    Service = "shared"
   }
 }
 
@@ -351,5 +360,6 @@ resource "aws_security_group" "ecs" {
 
   tags = {
     Name = "${var.project}-${var.environment}-ecs-sg"
+    Service = "shared"
   }
 }
