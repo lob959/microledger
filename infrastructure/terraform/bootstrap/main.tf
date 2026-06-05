@@ -57,7 +57,7 @@ resource "aws_s3_bucket" "terraform_state" {
   bucket = "microledger-tfstate-${data.aws_caller_identity.current.account_id}"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
   tags = {
     Name    = "microledger-tfstate"
