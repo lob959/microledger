@@ -33,7 +33,7 @@ services:
   # '-sharedDb' tells DynamoDB Local to use a single shared database file for
   # all regions and credentials, rather than separate files per credential set.
   # This simplifies local usage since the init container and both services all
-  # use 'dummy' credentials and 'eu-west-1', and they all see the same tables.
+  # use 'dummy' credentials and 'ap-southeast-2', and they all see the same tables.
   #
   # Port 8000 is DynamoDB Local's default. It is exposed on the host so you
   # can inspect tables directly with the AWS CLI:
@@ -79,7 +79,7 @@ services:
     depends_on:
       - dynamodb-local
     environment:
-      AWS_DEFAULT_REGION: eu-west-1
+      AWS_DEFAULT_REGION: ap-southeast-2
       AWS_ACCESS_KEY_ID: dummy       # Required by the CLI; ignored by DynamoDB Local
       AWS_SECRET_ACCESS_KEY: dummy   # Required by the CLI; ignored by DynamoDB Local
     entrypoint: ["/bin/sh", "-c"]
@@ -162,7 +162,7 @@ services:
     environment:
       DYNAMODB_TABLE: ledgerlite-accounts
       DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
-      AWS_REGION: eu-west-1
+      AWS_REGION: ap-southeast-2
       AWS_ACCESS_KEY_ID: dummy       # Local dev only — boto3 requires this when an endpoint_url is set
       AWS_SECRET_ACCESS_KEY: dummy   # Local dev only — boto3 requires this when an endpoint_url is set
       LOG_LEVEL: INFO
@@ -212,7 +212,7 @@ services:
       ACCOUNT_SERVICE_URL: http://account-service:8000  # Resolves within the Compose network
       DYNAMODB_TABLE: ledgerlite-transactions
       DYNAMODB_ENDPOINT_URL: http://dynamodb-local:8000
-      AWS_REGION: eu-west-1
+      AWS_REGION: ap-southeast-2
       AWS_ACCESS_KEY_ID: dummy       # Local dev only — boto3 requires this when an endpoint_url is set
       AWS_SECRET_ACCESS_KEY: dummy   # Local dev only — boto3 requires this when an endpoint_url is set
       LOG_LEVEL: INFO

@@ -24,7 +24,7 @@ def get_dynamodb_resource():
         return boto3.resource(
             "dynamodb",
             endpoint_url=endpoint_url,
-            region_name=os.getenv("AWS_REGION", "eu-west-1"),
+            region_name=os.getenv("AWS_REGION", "ap-southeast-2"),
             aws_access_key_id="dummy",
             aws_secret_access_key="dummy",
         )
@@ -32,7 +32,7 @@ def get_dynamodb_resource():
     # Production path — IAM task role is picked up automatically
     return boto3.resource(
         "dynamodb",
-        region_name=os.getenv("AWS_REGION", "eu-west-1"),
+        region_name=os.getenv("AWS_REGION", "ap-southeast-2"),
     )
 
 

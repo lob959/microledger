@@ -85,7 +85,7 @@ All configuration is supplied via environment variables.
 | --- | --- | --- |
 | `DYNAMODB_TABLE` | `ledgerlite-accounts` | DynamoDB table name for accounts |
 | `DYNAMODB_ENDPOINT_URL` | *(unset)* | Set in local dev to point at DynamoDB Local. Absent in AWS — boto3 uses the default region endpoint |
-| `AWS_REGION` | `eu-west-1` | AWS region for the DynamoDB client |
+| `AWS_REGION` | `ap-southeast-2` | AWS region for the DynamoDB client |
 | `APP_VERSION` | `local` | Deployed version; set to the Git SHA by CI. Surfaced at `/health` |
 | `SERVICE_NAME` | `account-service` | Included in every structured log line |
 | `LOG_LEVEL` | `INFO` | Python logging level |
@@ -111,7 +111,7 @@ docker build -t account-service .
 
 docker run -p 8002:8000 \
   -e DYNAMODB_ENDPOINT_URL=http://host.docker.internal:8000 \
-  -e AWS_REGION=eu-west-1 \
+  -e AWS_REGION=ap-southeast-2 \
   account-service
 ```
 

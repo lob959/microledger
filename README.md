@@ -193,7 +193,7 @@ terraform init \
   -backend-config="bucket=<your-state-bucket>" \
   -backend-config="dynamodb_table=<your-lock-table>" \
   -backend-config="key=terraform.tfstate" \
-  -backend-config="region=eu-west-1"
+  -backend-config="region=ap-southeast-2"
 
 # Preview the deployment
 make tf-plan

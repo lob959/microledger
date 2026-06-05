@@ -1,0 +1,12 @@
+﻿# Copy this file to terraform.tfvars and update any values you want to override.
+# terraform.tfvars is gitignored — never commit it.
+#
+# All variables have sensible defaults for a dev deployment; the values here
+# are provided for clarity and to make it easy to change the environment label
+# or scale up container sizes without hunting for where defaults are set.
+
+project          = "ledgerlite"
+environment      = "dev"
+aws_region       = "ap-southeast-2"
+container_cpu    = 256
+container_memory = 512
