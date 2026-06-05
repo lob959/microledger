@@ -13,7 +13,7 @@ from app.logger import get_logger
 logger = get_logger(__name__)
 
 app = FastAPI(
-    title="LedgerLite — Account Service",
+    title="Microledger — Account Service",
     version=os.getenv("APP_VERSION", "local"),
     description="Manages accounts and running balances. Balance updates are made by the Transaction Service via an internal endpoint not exposed on the ALB.",
 )
@@ -58,7 +58,7 @@ def create_account(request: CreateAccountRequest):
     """
     account_id = f"acc_{uuid.uuid4().hex[:8]}"
     created_at = datetime.now(timezone.utc).isoformat()
-    table_name = os.getenv("DYNAMODB_TABLE", "ledgerlite-accounts")
+    table_name = os.getenv("DYNAMODB_TABLE", "microledger-accounts")
 
     item = {
         "account_id": account_id,
@@ -93,7 +93,7 @@ def create_account(request: CreateAccountRequest):
 @app.get("/accounts/{account_id}", tags=["accounts"])
 def get_account(account_id: str):
     """Return account details and current balance."""
-    table_name = os.getenv("DYNAMODB_TABLE", "ledgerlite-accounts")
+    table_name = os.getenv("DYNAMODB_TABLE", "microledger-accounts")
 
     try:
         table = get_table(table_name)
@@ -131,7 +131,7 @@ def update_balance(account_id: str, request: BalanceAdjustmentRequest):
     Uses a DynamoDB conditional update so the write is rejected cleanly if the
     account does not exist, rather than silently creating a partial record.
     """
-    table_name = os.getenv("DYNAMODB_TABLE", "ledgerlite-accounts")
+    table_name = os.getenv("DYNAMODB_TABLE", "microledger-accounts")
     updated_at = datetime.now(timezone.utc).isoformat()
 
     try:

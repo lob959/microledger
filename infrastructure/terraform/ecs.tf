@@ -90,7 +90,7 @@ resource "aws_cloudwatch_log_group" "transaction_service" {
 # Cloud Map — Private DNS Namespace
 # ---------------------------------------------------------------------------
 # AWS Cloud Map is a service discovery service. This resource creates a
-# private DNS zone named "ledgerlite.local" that is resolvable only from
+# private DNS zone named "microledger.local" that is resolvable only from
 # within the VPC (not from the internet).
 #
 # When the account-service ECS service starts a task, it registers the task's
@@ -98,7 +98,7 @@ resource "aws_cloudwatch_log_group" "transaction_service" {
 # service name. The result is that any other ECS task in the VPC can reach
 # account-service at:
 #
-#   http://account-service.ledgerlite.local:8000
+#   http://account-service.microledger.local:8000
 #
 # This is the value of the ACCOUNT_SERVICE_URL environment variable injected
 # into the transaction-service task definition below. No hard-coded IP
@@ -106,7 +106,7 @@ resource "aws_cloudwatch_log_group" "transaction_service" {
 # or after a health check failure), the DNS record is updated automatically.
 #
 # vpc = aws_vpc.main.id — the namespace is private to this VPC. Tasks in other
-# VPCs cannot resolve ledgerlite.local, even if they are in the same account.
+# VPCs cannot resolve microledger.local, even if they are in the same account.
 
 resource "aws_service_discovery_private_dns_namespace" "main" {
   name        = "${var.project}.local"
@@ -123,7 +123,7 @@ resource "aws_service_discovery_private_dns_namespace" "main" {
 # ---------------------------------------------------------------------------
 # A Cloud Map "service" is the named endpoint within the namespace. When an
 # ECS task registers, it creates one A record of type "account-service" in
-# the "ledgerlite.local" namespace, resolving to the task's private IP.
+# the "microledger.local" namespace, resolving to the task's private IP.
 #
 # dns_records.type = "A" — registers IPv4 addresses (the private IPs of
 # Fargate task ENIs).
@@ -242,7 +242,7 @@ resource "aws_ecs_task_definition" "account_service" {
 # differences are:
 #
 # ACCOUNT_SERVICE_URL — injected as an environment variable pointing to the
-# Cloud Map DNS name "http://account-service.ledgerlite.local:8000". The
+# Cloud Map DNS name "http://account-service.microledger.local:8000". The
 # transaction-service main.py uses this URL in httpx.AsyncClient calls to
 # invoke POST /accounts/{id}/balance after recording each transaction.
 #
@@ -319,7 +319,7 @@ resource "aws_ecs_task_definition" "transaction_service" {
 #
 # service_registries — registers each task's private IP with the Cloud Map
 # service declared above. This creates the A record that resolves
-# "account-service.ledgerlite.local" to the task's IP.
+# "account-service.microledger.local" to the task's IP.
 #
 # lifecycle.ignore_changes = [task_definition] — Terraform sets the initial
 # task definition revision when it first creates the service. After that, the

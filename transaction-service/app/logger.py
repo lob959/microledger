@@ -26,7 +26,7 @@ class StructuredJSONFormatter(logging.Formatter):
         log_entry = {
             "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
             "level": record.levelname,
-            "service": os.getenv("SERVICE_NAME", "ledgerlite"),
+            "service": os.getenv("SERVICE_NAME", "microledger"),
             "logger": record.name,
             "message": record.getMessage(),
         }

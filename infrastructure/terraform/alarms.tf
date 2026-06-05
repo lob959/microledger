@@ -188,7 +188,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
 # trigger an alarm. DynamoDB only publishes this metric when errors occur.
 #
 # Note: this alarm covers all DynamoDB tables in the account/region. To scope
-# it to LedgerLite tables specifically, add TableName dimensions. However,
+# it to Microledger tables specifically, add TableName dimensions. However,
 # since this is a dedicated AWS account for the project, the broad scope is
 # acceptable and catches errors regardless of which table is affected.
 

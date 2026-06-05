@@ -48,7 +48,7 @@ locals {
 #                               Cloud Map registers each ECS task as an A record;
 #                               without DNS hostnames, those records cannot be
 #                               resolved from within the VPC, so
-#                               "account-service.ledgerlite.local" would not work.
+#                               "account-service.microledger.local" would not work.
 
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"

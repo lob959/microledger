@@ -15,7 +15,7 @@ from app.logger import get_logger
 logger = get_logger(__name__)
 
 app = FastAPI(
-    title="LedgerLite — Transaction Service",
+    title="Microledger — Transaction Service",
     version=os.getenv("APP_VERSION", "local"),
     description="Creates and retrieves financial transactions. Calls the Account Service to update balances.",
 )
@@ -74,7 +74,7 @@ async def create_transaction(transaction: TransactionRequest):
     """
     transaction_id = str(uuid.uuid4())
     created_at = datetime.now(timezone.utc).isoformat()
-    table_name = os.getenv("DYNAMODB_TABLE", "ledgerlite-transactions")
+    table_name = os.getenv("DYNAMODB_TABLE", "microledger-transactions")
 
     # ---- 1. Write transaction to DynamoDB --------------------------------
     item = {
@@ -168,7 +168,7 @@ async def get_transactions(account_id: str):
     (transaction_id / insert order). For large datasets add pagination via
     ExclusiveStartKey — left as a future enhancement.
     """
-    table_name = os.getenv("DYNAMODB_TABLE", "ledgerlite-transactions")
+    table_name = os.getenv("DYNAMODB_TABLE", "microledger-transactions")
 
     try:
         table = get_table(table_name)

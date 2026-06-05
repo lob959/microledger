@@ -1,10 +1,10 @@
 # Transaction Service
 
-The Transaction Service is responsible for creating and retrieving financial transactions. It is one of two microservices that make up LedgerLite — the other is the [Account Service](../account-service).
+The Transaction Service is responsible for creating and retrieving financial transactions. It is one of two microservices that make up Microledger — the other is the [Account Service](../account-service).
 
 When a transaction is created, the service performs two sequential operations:
 
-1. Persists the transaction record to its own DynamoDB table (`ledgerlite-transactions`).
+1. Persists the transaction record to its own DynamoDB table (`microledger-transactions`).
 2. Calls the Account Service over the internal network to adjust the account balance.
 
 The service does not own or store account data. Balance state is fully delegated to the Account Service.
@@ -120,7 +120,7 @@ All configuration is supplied via environment variables. The `docker-compose.yml
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `DYNAMODB_TABLE` | `ledgerlite-transactions` | DynamoDB table name for transactions |
+| `DYNAMODB_TABLE` | `microledger-transactions` | DynamoDB table name for transactions |
 | `ACCOUNT_SERVICE_URL` | `http://localhost:8002` | Base URL of the Account Service |
 | `DYNAMODB_ENDPOINT_URL` | *(unset)* | Set in local dev to point at DynamoDB Local. Absent in AWS — boto3 uses the default region endpoint |
 | `AWS_REGION` | `ap-southeast-2` | AWS region for the DynamoDB client |

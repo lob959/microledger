@@ -84,8 +84,8 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_managed" {
 # The task definitions in ecs.tf can inject SSM parameters as environment
 # variables at container startup. ECS fetches those parameters using the
 # execution role (not the task role), so this inline policy grants
-# GetParameters access scoped to the /ledgerlite/* parameter path only.
-# Tasks from a different project cannot read LedgerLite's parameters.
+# GetParameters access scoped to the /microledger/* parameter path only.
+# Tasks from a different project cannot read Microledger's parameters.
 
 resource "aws_iam_role_policy" "ecs_task_execution_ssm" {
   name = "ssm-read"

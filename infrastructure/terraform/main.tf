@@ -29,8 +29,8 @@ terraform {
   # Full init command (after running the bootstrap module):
   #   terraform init \
   #     -backend-config="bucket=<state-bucket-name>" \
-  #     -backend-config="dynamodb_table=ledgerlite-terraform-locks" \
-  #     -backend-config="key=ledgerlite/dev/terraform.tfstate" \
+  #     -backend-config="dynamodb_table=microledger-terraform-locks" \
+  #     -backend-config="key=microledger/dev/terraform.tfstate" \
   #     -backend-config="region=ap-southeast-2"
   backend "s3" {}
 }
@@ -75,7 +75,7 @@ variable "aws_region" {
 variable "project" {
   description = "Project name used as a prefix on resource names and tags. Changing this after initial apply will force replacement of most resources."
   type        = string
-  default     = "ledgerlite"
+  default     = "microledger"
 }
 
 variable "environment" {

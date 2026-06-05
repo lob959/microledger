@@ -1,4 +1,4 @@
-# LedgerLite
+# Microledger
 
 A containerised microledger built with Python, deployed on **AWS Fargate**, and provisioned end-to-end with Terraform.
 
@@ -189,33 +189,94 @@ This creates the S3 bucket and DynamoDB lock table. Store their names -- you wil
 cd infrastructure/terraform
 
 # Initialise Terraform with the remote backend
+# Use the bucket and table names printed by the bootstrap step above
 terraform init \
   -backend-config="bucket=<your-state-bucket>" \
-  -backend-config="dynamodb_table=<your-lock-table>" \
-  -backend-config="key=terraform.tfstate" \
+  -backend-config="dynamodb_table=microledger-terraform-locks" \
+  -backend-config="key=microledger/dev/terraform.tfstate" \
   -backend-config="region=ap-southeast-2"
 
-# Preview the deployment
+# Preview then apply
 make tf-plan
-
-# Apply the deployment
 make tf-apply
 ```
 
-After `apply` completes, Terraform outputs the ALB DNS name:
+### Build and push Docker images to ECR
+
+ECS cannot start tasks until both images exist in ECR. Run this from the **project root** after `make tf-apply`:
 
 ```bash
-terraform output alb_dns_name
+# Capture ECR URLs from Terraform outputs
+ECR_ACCOUNT=$(terraform -chdir=infrastructure/terraform output -raw ecr_account_service_url)
+ECR_TX=$(terraform -chdir=infrastructure/terraform output -raw ecr_transaction_service_url)
+
+# Authenticate Docker to ECR
+aws ecr get-login-password --region ap-southeast-2 | \
+  docker login --username AWS --password-stdin $(echo $ECR_ACCOUNT | cut -d/ -f1)
+
+# Build and push both images
+docker build -t $ECR_ACCOUNT:latest ./account-service && docker push $ECR_ACCOUNT:latest
+docker build -t $ECR_TX:latest ./transaction-service && docker push $ECR_TX:latest
 ```
 
-Then visit `http://<alb-dns-name>/docs` to access the Swagger UI.
+### Verify
+
+```bash
+ALB=$(terraform -chdir=infrastructure/terraform output -raw alb_dns_name)
+
+# Health check
+curl http://$ALB/health
+
+# Create an account and post a transaction
+curl -s -X POST http://$ALB/accounts \
+  -H "Content-Type: application/json" \
+  -d '{"owner": "Alice", "currency": "AUD"}' | python3 -m json.tool
+```
+
+Swagger UI is also available at `http://<alb-dns-name>/docs`.
 
 ### Destroy infrastructure
 
-**Warning: this deletes all resources including data.**
+Complete teardown in four steps. Work from the **project root** unless noted.
+
+**1. Main AWS infrastructure** (ECS, ALB, VPC, DynamoDB tables, ECR repos + images, IAM roles, SSM parameters):
 
 ```bash
 make tf-destroy
+```
+
+ECR repositories are configured with `force_delete = true` so Terraform removes all images automatically — no manual image deletion required.
+
+**2. Bootstrap resources** (S3 state bucket + DynamoDB lock table):
+
+The S3 bucket has a `prevent_destroy` guard, so it must be emptied before Terraform can remove it:
+
+```bash
+BUCKET=$(terraform -chdir=infrastructure/terraform/bootstrap output -raw state_bucket_name)
+
+# Delete all current objects and all versioned objects
+aws s3 rm s3://$BUCKET --recursive
+aws s3api delete-objects \
+  --bucket $BUCKET \
+  --delete "$(aws s3api list-object-versions --bucket $BUCKET \
+    --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' \
+    --output json)"
+
+# Now destroy the bootstrap stack
+cd infrastructure/terraform/bootstrap
+terraform destroy
+```
+
+**3. Local Docker stack** (containers and volumes):
+
+```bash
+make clean
+```
+
+**4. Local Docker images and build cache**:
+
+```bash
+docker system prune -a
 ```
 
 ---
@@ -255,7 +316,7 @@ All AWS infrastructure is defined in [`infrastructure/terraform/`](infrastructur
 - ECR repositories for both service images
 - ECS cluster and Fargate task definitions
 - Application Load Balancer with listener rules
-- DynamoDB tables (`ledgerlite-accounts`, `ledgerlite-transactions`)
+- DynamoDB tables (`microledger-accounts`, `microledger-transactions`)
 - IAM roles and policies (ECS task execution role, task role with DynamoDB access)
 - SSM Parameter Store entries for runtime config
 - CloudWatch alarms

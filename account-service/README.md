@@ -1,6 +1,6 @@
 # Account Service
 
-The Account Service owns all account and balance data. It is one of two microservices that make up LedgerLite — the other is the [Transaction Service](../transaction-service).
+The Account Service owns all account and balance data. It is one of two microservices that make up Microledger — the other is the [Transaction Service](../transaction-service).
 
 The service exposes a public API for creating and reading accounts, and an **internal-only** endpoint for updating balances. The balance endpoint is not reachable via the public ALB listener — it is called exclusively by the Transaction Service over the internal VPC network.
 
@@ -83,7 +83,7 @@ All configuration is supplied via environment variables.
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `DYNAMODB_TABLE` | `ledgerlite-accounts` | DynamoDB table name for accounts |
+| `DYNAMODB_TABLE` | `microledger-accounts` | DynamoDB table name for accounts |
 | `DYNAMODB_ENDPOINT_URL` | *(unset)* | Set in local dev to point at DynamoDB Local. Absent in AWS — boto3 uses the default region endpoint |
 | `AWS_REGION` | `ap-southeast-2` | AWS region for the DynamoDB client |
 | `APP_VERSION` | `local` | Deployed version; set to the Git SHA by CI. Surfaced at `/health` |

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/smoke-test.sh
 #
-# End-to-end integration test for the LedgerLite local stack.
+# End-to-end integration test for the Microledger local stack.
 #
 # What it covers:
 #   1. Health checks on both services
@@ -42,7 +42,7 @@ pass()   { echo -e "${GREEN}✓${RESET} $1"; }
 fail()   { echo -e "${RED}✗${RESET} $1"; exit 1; }
 header() { echo -e "\n${BOLD}$1${RESET}"; }
 
-header "=== LedgerLite Smoke Test ==="
+header "=== Microledger Smoke Test ==="
 
 # ── 1. Health checks ──────────────────────────────────────────────────────────
 # Confirm both services are up and returning a healthy response before running

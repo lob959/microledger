@@ -29,7 +29,7 @@
 # ---------------------------------------------------------------------------
 # The internal DNS name that the transaction-service uses to call the
 # account-service's balance endpoint. This value uses the Cloud Map private
-# DNS name registered in ecs.tf: "account-service.ledgerlite.local".
+# DNS name registered in ecs.tf: "account-service.microledger.local".
 #
 # The DNS name resolves only within the VPC — it is not accessible from the
 # internet. Cloud Map registers one A record per running task, so DNS-based

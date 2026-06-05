@@ -45,7 +45,7 @@ data "aws_caller_identity" "current" {}
 # to all team members and CI/CD pipelines regardless of where 'terraform apply'
 # is run. Storing it locally is only viable for solo development.
 #
-# The bucket name embeds the AWS account ID (e.g. "ledgerlite-tfstate-123456789012")
+# The bucket name embeds the AWS account ID (e.g. "microledger-tfstate-123456789012")
 # to guarantee global uniqueness without configuration.
 #
 # lifecycle prevent_destroy = true — 'terraform destroy' will refuse to delete
@@ -54,7 +54,7 @@ data "aws_caller_identity" "current" {}
 # To actually delete the bucket, remove this block and re-plan first.
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "ledgerlite-tfstate-${data.aws_caller_identity.current.account_id}"
+  bucket = "microledger-tfstate-${data.aws_caller_identity.current.account_id}"
 
   lifecycle {
     prevent_destroy = true
@@ -126,7 +126,7 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
 # which is infrequent, so on-demand billing is far cheaper than provisioned.
 
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "ledgerlite-terraform-locks"
+  name         = "microledger-terraform-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 

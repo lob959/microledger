@@ -36,7 +36,7 @@
 # ECR Repository — account-service
 # ---------------------------------------------------------------------------
 # Stores versioned Docker images for the account-service. The repository name
-# uses a namespace prefix (ledgerlite/account-service) to group both service
+# uses a namespace prefix (microledger/account-service) to group both service
 # images together in the ECR console.
 #
 # image_tag_mutability = "MUTABLE" — allows the :latest tag to be overwritten
@@ -50,6 +50,7 @@
 resource "aws_ecr_repository" "account_service" {
   name                 = "${var.project}/account-service"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true
 
   image_scanning_configuration {
     scan_on_push = true
@@ -67,6 +68,7 @@ resource "aws_ecr_repository" "account_service" {
 resource "aws_ecr_repository" "transaction_service" {
   name                 = "${var.project}/transaction-service"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true
 
   image_scanning_configuration {
     scan_on_push = true

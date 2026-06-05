@@ -5,7 +5,7 @@
 # are provided for clarity and to make it easy to change the environment label
 # or scale up container sizes without hunting for where defaults are set.
 
-project          = "ledgerlite"
+project          = "microledger"
 environment      = "dev"
 aws_region       = "ap-southeast-2"
 container_cpu    = 256

@@ -3,13 +3,13 @@
 # =============================================================================
 #
 # Amazon DynamoDB is a fully managed, serverless NoSQL key-value and document
-# database. LedgerLite uses two tables: one for account records and one for
+# database. Microledger uses two tables: one for account records and one for
 # transaction records. There are no EC2 instances, patches, or backups to
 # manage — AWS handles all of that.
 #
 # The table names here exactly match the DYNAMODB_TABLE environment variable
-# values set in docker-compose.yml ("ledgerlite-accounts" and
-# "ledgerlite-transactions"). This means the same env var values work
+# values set in docker-compose.yml ("microledger-accounts" and
+# "microledger-transactions"). This means the same env var values work
 # identically in local development and in production without any code changes.
 #
 # ECS tasks access these tables using the task role defined in iam.tf. The
@@ -41,7 +41,7 @@
 #   kms_key_arn to the ARN of your KMS key.
 
 resource "aws_dynamodb_table" "accounts" {
-  name         = "ledgerlite-accounts"
+  name         = "microledger-accounts"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "account_id"
 
@@ -55,7 +55,7 @@ resource "aws_dynamodb_table" "accounts" {
   }
 
   tags = {
-    Name = "ledgerlite-accounts"
+    Name = "microledger-accounts"
   }
 }
 
@@ -83,7 +83,7 @@ resource "aws_dynamodb_table" "accounts" {
 # transaction-service/app/main.py.
 
 resource "aws_dynamodb_table" "transactions" {
-  name         = "ledgerlite-transactions"
+  name         = "microledger-transactions"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "account_id"
   range_key    = "transaction_id"
@@ -103,6 +103,6 @@ resource "aws_dynamodb_table" "transactions" {
   }
 
   tags = {
-    Name = "ledgerlite-transactions"
+    Name = "microledger-transactions"
   }
 }

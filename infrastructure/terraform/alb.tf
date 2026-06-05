@@ -3,12 +3,12 @@
 # =============================================================================
 #
 # The Application Load Balancer is the single public entry point into the
-# LedgerLite stack. It accepts HTTP traffic from the internet on port 80 and
+# Microledger stack. It accepts HTTP traffic from the internet on port 80 and
 # forwards it to the transaction-service ECS tasks in the private subnets.
 #
 # The account-service is NOT attached to this ALB. It is only reachable from
 # within the VPC via the Cloud Map private DNS name
-# "account-service.ledgerlite.local". This enforces the architectural boundary:
+# "account-service.microledger.local". This enforces the architectural boundary:
 # the transaction-service is the public API; the account-service is internal
 # infrastructure. In particular, the balance-update endpoint
 # (PUT /accounts/{id}/balance) is never directly reachable from the internet.
